@@ -14,7 +14,8 @@ Deep neural network models are used to classify the sound data according to the 
     sh train.sh
 
 
-"""This tutorial was created by aqibsaeed"""
-"""The Urban Sound Dataset was created by MARL and CUSP of NYU"""
+The Urban Sound Dataset was created by MARL and CUSP of NYU
+at: 
+    https://urbansounddataset.weebly.com/index.html#welcome
 
 
