@@ -3,41 +3,48 @@ import os
 import numpy as np
 import glob as g
 import tqdm
+import tarfile
+import requests
+from urllib.request import urlretrieve, urlopen
+from os.path import isfile, isdir
 
 FILE_EXT='*.wav'
-FILE_NAME=''
+FILE_NAME='./UrbanSound8k.tar.gz'
 FILE_URL='https://www.google.com/url?q=https://goo.gl/8hY5ER&sa=D&ust=1538505137084000&usg=AFQjCNEFbxtZWZdlAWlAX0LVnZTty_y2HQ'
 DATAPATH='./data'
 
-class DownloadProgress(tqdm):
-    last_block = 0
+def DownloadData(url, file_name):
+    # open in binary mode
+    with open(file_name, "wb") as f:
+        # get request
+        print('Downloading...')
+        response = requests.get(url)
+        # write to file
+        f.write(response.content)
+        print('Download complete')
 
-    def hook(self, block_num=1, block_size=1, total_size=None):
-        self.total = total_size
-        self.update((block_num - self.last_block) * block_size)
-        self.last_block = block_num
+    if not isdir(DATAPATH):
+        path = os.getcwd()
+        path = path + '/data'
+        print('Creating ' + path + ' directory for Urban Sound Dataset')
+        try:
+            os.mkdir(path)
+        except:
+            print('Failed to create the following directory:{}'.format(path))
+        else:
+            print('{} directory created'.format(path))
+
+        if isfile(FILE_NAME):
+            with tarfile.open(FILE_NAME) as tar:
+                tar.extractall(path)
+                tar.close()
+            
 
 class FeatureParser():
     def __init__(self, file_ext=FILE_EXT):
         self.file_ext = file_ext
 
-    def DownloadData(datapath):
-        # If dataset is not already donwloaded yet, download it
-        print('Checking for downloaded dataset...')
-
-        if not isfile(FILE_NAME):
-            with DownloadProgress(unit='B', unit_scale=True, miniters=1, desc='Urban Sound Dataset') as progressbar:
-                urlretrieve(FILE_URL, 'UrbanSound8K.tar.gz',progressbar.hook)
-
-        else:
-            pass
-
-        if not isdir(DATAPATH):
-           with tarfile.open(FILE_NAME) as tar:
-               tar.extractall()
-               tar.close()
-
-    def extract_feature(path):
+    def extract_feature(self, path):
         Y, sample_rate = librosa.load(path)
         stft = np.abs(librosa.stft(Y))
         mfcc = np.mean(librosa.feature.mfcc(y=Y, sr=sample_rate, n_mfcc=40).T, axis=0)
@@ -47,7 +54,7 @@ class FeatureParser():
         tonnetz = np.mean(librosa.feature.tonnetz(y=librosa.effect.harmonic(Y), sr=sample_rate).T, axis=0)
         return mfccs, chroma, mel, contrast, tonnetz
 
-    def parse_audio_files(parent_dir, sub_dir, file_ext=FILE_EXT):
+    def parse_audio_files(self, parent_dir, sub_dir, file_ext=FILE_EXT):
         features, labels = np.empty((0, 193)), np.empty(0) #TODO:Initialize with normal distribution values
         for label, sub_dir in enumerate(sub_dir):
             for fn in g.glob(os.path.join(parent_dir, sub_dir, file_ext)):
@@ -61,7 +68,7 @@ class FeatureParser():
                 labels = np.append(labels, fn.split('/')[2].split('-')[1])
         return np.array(features), np.array(labels, dtype = np.int)
 
-    def one_hot_encode(labels):
+    def one_hot_encode(self, labels):
         n_labels = len(labels)
         n_unique_labels = len(np.unique(labels))
         one_hot_encode = np.zeros(n_labels, n_unique_labels)
@@ -70,7 +77,8 @@ class FeatureParser():
 
 def main():
     f = FeatureParser()
-    f.DownloadData(DATAPATH)
+    DownloadData(FILE_URL, FILE_NAME)
+
 
 if __name__ == '__main__':
     main()

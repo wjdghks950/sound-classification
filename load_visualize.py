@@ -76,7 +76,7 @@ def main():
                 "jackhammer","siren","street music"]
 
     loader = LoadPlot(1)
-    raw_sounds = loader.load_sound_files('data/' + i for i in sound_file_paths)
+    raw_sounds = loader.load_sound_files('sample_data/' + i for i in sound_file_paths)
 
     #loader.plot_waves(sound_names, raw_sounds)
     #loader.plot_specgram(sound_names, raw_sounds)
