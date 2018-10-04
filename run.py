@@ -1,9 +1,10 @@
 import tensorflow as tf
+import numpy as np
 from feature_extract import FeatureParser
 from train_layers import FeedForward
 
 NUM_CLASS=10
-LEARNING_RATE=1-e2
+LEARNING_RATE=1e-2
 
 def main():
 

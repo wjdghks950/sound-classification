@@ -20,11 +20,15 @@ class FeedForward():
 
     def train_layers(self, train_x, train_y, test_x, test_y):
         params = {}
-        params['W1'] = tf.Variable(tf.random_normal([self.opt['n_dim'], self.opt['num_hidden1']], mean = 0, stddev=self.opt['std']))
-        params['b1'] = tf.Variable(tf.random_normal([self.opt['num_hidden1'], mean = 0, stddev=std))
-        params['a1'] = nn.sigmoid(tf.matmaul(X, params['W1']) + params['b1'])
 
-        params['W2'] = tf.Variable(tf.random_normal([self.opt['num_hidden1'], self.opt['num_hidden2']], mean = 0, stddev=self.opt['std'])
+        X = tf.placeholder(tf.float32, [None, self.opt['n_dim']])
+        Y = tf.placeholder(tf.float32, [None, self.opt['n_classes']])
+
+        params['W1'] = tf.Variable(tf.random_normal([self.opt['n_dim'], self.opt['num_hidden1']], mean = 0, stddev=self.opt['std']))
+        params['b1'] = tf.Variable(tf.random_normal([self.opt['num_hidden1']], mean = 0, stddev=self.opt['std']))
+        params['a1'] = nn.sigmoid(tf.matmul(X, params['W1']) + params['b1'])
+
+        params['W2'] = tf.Variable(tf.random_normal([self.opt['num_hidden1'], self.opt['num_hidden2']], mean = 0, stddev=self.opt['std']))
         params['b2'] = tf.Variable(tf.random_normal([self.opt['num_hidden2']], mean=0, stddev=self.opt['std']))
         params['a2'] = nn.tanh(tf.matmul(params['a1'], params['W2']) + params['b2'])
 
@@ -34,15 +38,12 @@ class FeedForward():
         out = nn.softmax(tf.matmul(params['a2'], params['outW']) + params['outb'])
 
         cost = -tf.reduce_sum(Y * tf.log(out))
-        optimizer = tf.train.GradientDescentOptimizer(opt['learning_rate']).minimize(cost)
+        optimizer = tf.train.GradientDescentOptimizer(self.opt['learning_rate']).minimize(cost)
 
         correct_pred = tf.equal(tf.argmax(out, 1), tf.argmax(Y, 1))
         accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
 
-        X = tf.placeholder(tf.float32, [None, self.opt['n_dim'])
-        Y = tf.placeholder(tf.float32, [None, self.opt['n_classes'])
-
-        cost_history = np.empty(shape=p1[, dtype=float)
+        cost_history = np.empty(shape=[1], dtype=float)
         y, y_pred = None, None
 
         print('Training...')
