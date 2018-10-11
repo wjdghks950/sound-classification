@@ -19,13 +19,14 @@ def main():
     labels = f.one_hot_encode(labels)
 
     train_test_split = np.random.rand(len(features)) < 0.70
+    print('Train_test_split index:{}'.format(train_test_split))
     train_x = features[train_test_split]
     train_y = labels[train_test_split]
     test_x = features[~train_test_split]
     test_y = labels[~train_test_split]
 
     with tf.Session() as sess:
-        print('Shape of train_x:{}'.format(sess.run(tf.shape(train_x))))
+        print('Shape of test_y:{}'.format(sess.run(tf.shape(test_y))))
 
     print('TRAIN_X:{}\nTEST_X:{}'.format(train_x, test_x))
     print('FEATURE SHAPE:{}'.format(features.shape[1]))

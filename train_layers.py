@@ -1,10 +1,9 @@
 import tensorflow as tf
 import tensorflow.nn as nn
-import os
 import numpy as np
 from sklearn.metrics import precision_recall_fscore_support
 
-training_epochs = 50
+training_epochs = 500
 learning_rate = 0.01
 
 class FeedForward():
@@ -60,6 +59,8 @@ class FeedForward():
 
         fig = plt.figure(figsize=(10, 8))
         plt.plot(cost_history)
+        plt.ylabel("Cost")
+        plt.xlabel("Iterations")
         plt.axis([0, training_epochs, 0, np.max(cost_history)])
         plt.show()
 
