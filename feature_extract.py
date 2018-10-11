@@ -51,24 +51,28 @@ class FeatureParser():
         chroma = np.mean(librosa.feature.chroma_stft(S=stft, sr=sample_rate).T, axis=0)
         mel = np.mean(librosa.feature.melspectrogram(Y, sr=sample_rate).T, axis=0)
         contrast = np.mean(librosa.feature.spectral_contrast(S=stft, sr=sample_rate).T, axis=0)
-        tonnetz = np.mean(librosa.feature.tonnetz(y=librosa.effect.harmonic(Y), sr=sample_rate).T, axis=0)
-        return mfccs, chroma, mel, contrast, tonnetz
+        tonnetz = np.mean(librosa.feature.tonnetz(y=librosa.effects.harmonic(Y), sr=sample_rate).T, axis=0)
+        return mfcc, chroma, mel, contrast, tonnetz
 
-    def parse_audio_files(self, parent_dir, sub_dir, file_ext=FILE_EXT):
+    def parse_audio_files(self, parent_dir, sub_dirs, file_ext=FILE_EXT):
         features, labels = np.empty((0, 193)), np.empty(0) 
-        for label, sub_dir in enumerate(sub_dir):
+        for label, sub_dir in enumerate(sub_dirs):
+            print('Subdirectory path:{}'.format(sub_dir))
             for fn in g.glob(os.path.join(parent_dir, sub_dir, file_ext)):
+                print('***PATH:{}***'.format(fn))
                 try:
                     if os.path.exists(fn):
-                        print('PATH:{}'.format(fn))
-                        mfcc, chroma, mel, contrast, tonnetz = extract_feature(fn)
+                        mfcc, chroma, mel, contrast, tonnetz = self.extract_feature(fn)
                         print('MFCC:{}, chroma:{}'.format(mfcc, chroma))
-                except Exception:
-                    print('Error while extracting feature from the file; at parse_audio_files', fn)
-                    continue
-                extfeatures = np.hstack([mfcc, chroma, mel, contrast, tonnetz])
+                    else:
+                        raise ValueError('Error while extracting feature from the file; at parse_audio_files')
+                except ValueError as err:
+                    print(err.args)
+
+                ext_features = np.hstack([mfcc, chroma, mel, contrast, tonnetz])
                 features = np.vstack([features, ext_features])
-                labels = np.append(labels, fn.split('/')[2].split('-')[1])
+                labels = np.append(labels, fn.split('/')[7].split('-')[1])
+                print('Class number:{}'.format(fn.split('/')[7].split('-')[1]))
         return np.array(features), np.array(labels, dtype = np.int)
 
     def one_hot_encode(self, labels):

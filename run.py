@@ -5,7 +5,7 @@ from train_layers import FeedForward
 
 NUM_CLASS=10
 LEARNING_RATE=1e-2
-PARENT_DIR='/media/jeonghwan/Seagate Expansion Driver/UrbanSound8K/audio'
+PARENT_DIR='/media/jeonghwan/Seagate Expansion Drive/UrbanSound8K/audio'
 
 def main():
 
@@ -14,10 +14,13 @@ def main():
     parent_dir = PARENT_DIR
     sub_dir = ['fold1', 'fold2', 'fold3']
 
+    print('Parsing audio files...')
+    print('Extracting features...')
     features, labels = f.parse_audio_files(parent_dir, sub_dir)
 
     labels = f.one_hot_encode(labels)
-
+    print('Length of features:{}'.format(len(features)))
+ 
     train_test_split = np.random.rand(len(features)) < 0.70
     print('Train_test_split index:{}'.format(train_test_split))
     train_x = features[train_test_split]
