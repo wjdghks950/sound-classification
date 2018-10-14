@@ -1,7 +1,9 @@
 import tensorflow as tf
 import numpy as np
+import pickle
 from feature_extract import FeatureParser
 from train_layers import FeedForward
+from os.path import isfile
 
 NUM_CLASS=10
 LEARNING_RATE=1e-2
@@ -28,14 +30,27 @@ def main():
     test_x = features[~train_test_split]
     test_y = labels[~train_test_split]
 
-    with tf.Session() as sess:
-        print('Shape of test_y:{}'.format(sess.run(tf.shape(test_y))))
+    if not isfile('audio_dataset_nn.pickle'):
+        data_dict = {'tr_features': train_x,
+                     'tr_labels': train_y,
+                     'ts_features': test_x,
+                     'ts_labels': test_y}
 
-    print('TRAIN_X:{}\nTEST_X:{}'.format(train_x, test_x))
+        with open('audio_dataset_nn.pickle', 'wb') as handle:
+            pickle.dump(data_dict, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+    else:
+        with open('audio_dataset_nn.pickle', 'rb') as handle:
+            data = pickle.load(handle)
+
+    with tf.Session() as sess:
+        print('Shape of test_x:{}'.format(sess.run(tf.shape(data['ts_features']))))
+
+    print('TRAIN_X:{}\nTEST_X:{}'.format(data['tr_features'], data['ts_features']))
     print('FEATURE SHAPE:{}'.format(features.shape[1]))
     # Initialize the feed-forward model
     model = FeedForward(features.shape[1], NUM_CLASS, LEARNING_RATE)
-    model.train_layers(train_x, train_y, test_x, test_y)
+    model.train_layers(data['tr_features'], data['tr_labels'], data['ts_features'], data['ts_labels'])
 
 
 if __name__ == '__main__':

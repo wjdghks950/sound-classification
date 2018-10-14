@@ -45,6 +45,9 @@ class FeedForward():
         cost_history = np.empty(shape=[1], dtype=float)
         y, y_pred = None, None
 
+        y_shape = tf.shape(train_y)
+        train_y = tf.reshape(train_y, [y_shape[0], 10]) #TODO
+
         print('Training...')
         with tf.Session() as sess:
             sess.run(tf.global_variables_initializer())

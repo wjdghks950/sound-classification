@@ -1,4 +1,5 @@
 import librosa
+import pickle
 import os
 import numpy as np
 import glob as g
@@ -11,7 +12,7 @@ from os.path import isfile, isdir
 FILE_EXT='*.wav'
 FILE_NAME='./UrbanSound8k.tar.gz'
 FILE_URL='https://www.google.com/url?q=https://goo.gl/8hY5ER&sa=D&ust=1538505137084000&usg=AFQjCNEFbxtZWZdlAWlAX0LVnZTty_y2HQ'
-DATAPATH='/media/jeonghwan/Seagate Expansion Drive/UrbanSound8K'
+DATAPATH='/media/jeonghwan/Seagate Expansion Drive/UrbanSound8K/audio'
 
 def DownloadData(url, file_name):
     # open in binary mode
@@ -44,8 +45,12 @@ class FeatureParser():
     def __init__(self, file_ext=FILE_EXT):
         self.file_ext = file_ext
 
-    def extract_feature(self, path):
-        Y, sample_rate = librosa.load(path)
+    def extract_feature(self, path, pickle_exists=False):
+        if pickle_exists is False:
+            Y, sample_rate = librosa.load(path)
+        else:
+            pass
+
         stft = np.abs(librosa.stft(Y))
         mfcc = np.mean(librosa.feature.mfcc(y=Y, sr=sample_rate, n_mfcc=40).T, axis=0)
         chroma = np.mean(librosa.feature.chroma_stft(S=stft, sr=sample_rate).T, axis=0)
@@ -55,24 +60,24 @@ class FeatureParser():
         return mfcc, chroma, mel, contrast, tonnetz
 
     def parse_audio_files(self, parent_dir, sub_dirs, file_ext=FILE_EXT):
-        features, labels = np.empty((0, 193)), np.empty(0) 
-        for label, sub_dir in enumerate(sub_dirs):
-            print('Subdirectory path:{}'.format(sub_dir))
-            for fn in g.glob(os.path.join(parent_dir, sub_dir, file_ext)):
-                print('***PATH:{}***'.format(fn))
-                try:
-                    if os.path.exists(fn):
-                        mfcc, chroma, mel, contrast, tonnetz = self.extract_feature(fn)
-                        print('MFCC:{}, chroma:{}'.format(mfcc, chroma))
-                    else:
-                        raise ValueError('Error while extracting feature from the file; at parse_audio_files')
-                except ValueError as err:
-                    print(err.args)
+        features, labels = np.empty((0, 193)), np.empty(0)
 
-                ext_features = np.hstack([mfcc, chroma, mel, contrast, tonnetz])
-                features = np.vstack([features, ext_features])
-                labels = np.append(labels, fn.split('/')[7].split('-')[1])
-                print('Class number:{}'.format(fn.split('/')[7].split('-')[1]))
+        if not isfile('audio_dataset_nn.pickle'):
+            for label, sub_dir in enumerate(sub_dirs):
+                print('Subdirectory path:{}'.format(sub_dir))
+                for fn in g.glob(os.path.join(parent_dir, sub_dir, file_ext)):
+                    try:
+                        if os.path.exists(fn):
+                            mfcc, chroma, mel, contrast, tonnetz = self.extract_feature(fn)
+                        else:
+                            raise ValueError('Error while extracting feature from the file; at parse_audio_files')
+                    except ValueError as err:
+                        print(err.args)
+
+                    ext_features = np.hstack([mfcc, chroma, mel, contrast, tonnetz])
+                    features = np.vstack([features, ext_features])
+                    labels = np.append(labels, fn.split('/')[7].split('-')[1])
+
         return np.array(features), np.array(labels, dtype = np.int)
 
     def one_hot_encode(self, labels):
