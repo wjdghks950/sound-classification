@@ -23,7 +23,7 @@ def main():
     labels = f.one_hot_encode(labels)
     print('Length of features:{}'.format(len(features)))
 
-    if not isfile('audio_dataset_nn.pickle'):
+    if not isfile('audio_dataset.pickle'):
         data_dict = {'tr_features': train_x,
                      'tr_labels': train_y,
                      'ts_features': test_x,

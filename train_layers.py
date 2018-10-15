@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from feature_extract import FeatureParser
 from sklearn.metrics import precision_recall_fscore_support
 
-training_epochs = 500
+training_epochs = 5000
 
 class FeedForward():
     def __init__(self, n_dim, n_classes, lr):
@@ -14,9 +14,9 @@ class FeedForward():
         self.opt['n_classes'] = n_classes
         self.opt['learning_rate'] = lr
         self.opt['std'] = 1 / np.sqrt(n_dim)
-        self.opt['num_hidden1'] = 200
-        self.opt['num_hidden2'] = 500
-        self.opt['num_hidden3'] = 300
+        self.opt['num_hidden1'] = 500
+        self.opt['num_hidden2'] = 1000
+        self.opt['num_hidden3'] = 700
 
 
     def train_layers(self, train_x, train_y, test_x, test_y):
@@ -33,12 +33,12 @@ class FeedForward():
 
         params['W2'] = tf.Variable(tf.random_normal([self.opt['num_hidden1'], self.opt['num_hidden2']], mean = 0, stddev=self.opt['std']))
         params['b2'] = tf.Variable(tf.random_normal([self.opt['num_hidden2']], mean=0, stddev=self.opt['std']))
-        params['a2'] = nn.tanh(tf.matmul(params['dropout1'], params['W2']) + params['b2'])
+        params['a2'] = nn.relu(tf.matmul(params['dropout1'], params['W2']) + params['b2'])
         params['dropout2'] = nn.dropout(params['a2'], keep_prob)
 
         params['W3'] = tf.Variable(tf.random_normal([self.opt['num_hidden2'], self.opt['num_hidden3']], mean = 0, stddev=self.opt['std']))
         params['b3'] = tf.Variable(tf.random_normal([self.opt['num_hidden3']], mean=0, stddev=self.opt['std']))
-        params['a3'] = nn.relu(tf.matmul(params['dropout2'], params['W3']) + params['b3'])
+        params['a3'] = nn.tanh(tf.matmul(params['dropout2'], params['W3']) + params['b3'])
         params['dropout3'] = nn.dropout(params['a3'], keep_prob)
 
         params['outW'] = tf.Variable(tf.random_normal([self.opt['num_hidden3'], self.opt['n_classes']], mean=0, stddev=self.opt['std']))
@@ -68,13 +68,13 @@ class FeedForward():
             for epoch in range(training_epochs):
                 _, loss, acc = sess.run([optimizer, cost, accuracy], feed_dict={X:train_x, Y:train_y, keep_prob: 0.5})
                 cost_history = np.append(cost_history, loss)
-                if epoch % 10 == 0:
+                if epoch % 50 == 0:
                     print('Epoch#', epoch, 'Cost:', loss, 'Train acc.:', acc)
             
-            y_pred = sess.run(tf.argmax(out, 1), feed_dict={X: test_x})
+            y_pred = sess.run(tf.argmax(out, 1), feed_dict={X: test_x, keep_prob: 1.0})
             y = sess.run(tf.argmax(test_y, 1))
 
-            print("Test accuracy: ", round(sess.run(accuracy, feed_dict={X: test_x, Y: test_y}), 3))
+            print("Test accuracy: ", round(sess.run(accuracy, feed_dict={X: test_x, Y: test_y, keep_prob:1.0}), 3))
 
         fig = plt.figure(figsize=(10, 8))
         plt.plot(cost_history)

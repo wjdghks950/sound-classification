@@ -62,7 +62,7 @@ class FeatureParser():
     def parse_audio_files(self, parent_dir, sub_dirs, file_ext=FILE_EXT):
         features, labels = np.empty((0, 193)), np.empty(0)
 
-        if not isfile('audio_dataset_nn.pickle'):
+        if not isfile('audio_dataset.pickle'):
             for label, sub_dir in enumerate(sub_dirs):
                 print('Subdirectory path:{}'.format(sub_dir))
                 for fn in g.glob(os.path.join(parent_dir, sub_dir, file_ext)):
