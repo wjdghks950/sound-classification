@@ -6,7 +6,7 @@ from train_layers import FeedForward
 from os.path import isfile
 
 NUM_CLASS=10
-LEARNING_RATE=1e-2
+LEARNING_RATE=1e-3
 PARENT_DIR='/media/jeonghwan/Seagate Expansion Drive/UrbanSound8K/audio'
 
 def main():
@@ -35,6 +35,8 @@ def main():
     else:
         with open('audio_dataset_nn.pickle', 'rb') as handle:
             data = pickle.load(handle)
+
+    tf.reset_default_graph()
 
     with tf.Session() as sess:
         print('Shape of test_x:{}'.format(sess.run(tf.shape(data['ts_features']))))
