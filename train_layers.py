@@ -46,7 +46,10 @@ class FeedForward():
         y, y_pred = None, None
 
         y_shape = tf.shape(train_y)
-        train_y = tf.reshape(train_y, [y_shape[0], 10]) #TODO
+        #reshape labels into a one hot vector
+        tr_onehot_lbl = np.eye(self.opt['n_classes'])[train_y] #TODO
+
+        print('TRAIN_ONE_HOT_LABEL{}'.format(tr_onehot_lbl))
 
         print('Training...')
         with tf.Session() as sess:

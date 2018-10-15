@@ -22,13 +22,6 @@ def main():
 
     labels = f.one_hot_encode(labels)
     print('Length of features:{}'.format(len(features)))
- 
-    train_test_split = np.random.rand(len(features)) < 0.70
-    print('Train_test_split index:{}'.format(train_test_split))
-    train_x = features[train_test_split]
-    train_y = labels[train_test_split]
-    test_x = features[~train_test_split]
-    test_y = labels[~train_test_split]
 
     if not isfile('audio_dataset_nn.pickle'):
         data_dict = {'tr_features': train_x,
@@ -49,7 +42,7 @@ def main():
     print('TRAIN_X:{}\nTEST_X:{}'.format(data['tr_features'], data['ts_features']))
     print('FEATURE SHAPE:{}'.format(features.shape[1]))
     # Initialize the feed-forward model
-    model = FeedForward(features.shape[1], NUM_CLASS, LEARNING_RATE)
+    model = FeedForward(data['tr_features'].shape[1], NUM_CLASS, LEARNING_RATE)
     model.train_layers(data['tr_features'], data['tr_labels'], data['ts_features'], data['ts_labels'])
 
 
