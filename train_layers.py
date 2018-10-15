@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from feature_extract import FeatureParser
 from sklearn.metrics import precision_recall_fscore_support
 
-training_epochs = 5000
+training_epochs = 1000
 
 class FeedForward():
     def __init__(self, n_dim, n_classes, lr):
