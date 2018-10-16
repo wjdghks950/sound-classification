@@ -45,6 +45,12 @@ class FeatureParser():
     def __init__(self, file_ext=FILE_EXT):
         self.file_ext = file_ext
 
+    def windows(self, data, window_size):
+        start = 0
+        while start < len(data):
+            yield start, start + window_size
+            start += (window_size / 2)
+
     def extract_feature(self, path, pickle_exists=False):
         if pickle_exists is False:
             Y, sample_rate = librosa.load(path)
@@ -58,6 +64,32 @@ class FeatureParser():
         contrast = np.mean(librosa.feature.spectral_contrast(S=stft, sr=sample_rate).T, axis=0)
         tonnetz = np.mean(librosa.feature.tonnetz(y=librosa.effects.harmonic(Y), sr=sample_rate).T, axis=0)
         return mfcc, chroma, mel, contrast, tonnetz
+
+    # Extracting and preprocessing features for ConvNet
+    def extract_CNNfeature(self, parent_dir, sub_dirs, file_ext=FILE_EXT, bands = 60, frames = 41):
+        window_size = 512 * (frames - 1)
+        log_specgrams = []
+        labels = []
+        if not isfile('audio_CNNdataset.pickle'):
+            for label, sub_dir in enumerate(sub_dirs):
+                for fn in g.glob(os.path.join(parent_dir, sub_dir, file_ext)):
+                    sound_clip, sr = librosa.load(fn)
+                    lbl = fn.split('/')[7].split('-')[1]
+                    for (start, end) in self.windows(sound_clip, window_size):
+                        if(len(sound_clip[start:end]) == window_size):
+                            signal = sound_clip[start:end]
+                            melspec = librosa.feature.melspectrogram(signal, n_mels = bands)
+                            logspec = librosa.core.amplitude_to_db(melspec)
+                            logspec = logspec.T.flatten()[:, np.newaxis].T
+                            log_specgrams.append(logspec)
+                            labels.append(lbl)
+
+            log_specgrams = np.asarray(log_specgrams).reshape(len(log_specgrams), bands, frames, 1)
+            features = np.concatenate((log_specgrams, np.zeros(np.shape(log_specgrams))), axis=3)
+            for i in range(len(features)):
+                features[i, :, :, 1] = librosa.feature.delta(features[i, :, :, 0])
+        
+        return np.array(features), np.array(labels, dtype=np.int)
 
     def parse_audio_files(self, parent_dir, sub_dirs, file_ext=FILE_EXT):
         features, labels = np.empty((0, 193)), np.empty(0)
