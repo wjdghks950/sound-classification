@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from feature_extract import FeatureParser
 from sklearn.metrics import precision_recall_fscore_support
 
-training_epochs = 1000
+training_epochs = 2000
 
 class FeedForward():
     def __init__(self, n_dim, n_classes, lr):
@@ -102,8 +102,8 @@ class ConvNet():
         self.opt['depth'] = depth
 
     def weight_variable(self, shape):
-        initial = tf.truncated_normal(shape, stddev=0.1)
-        return tf.Variable(inital)
+        initial = tf.truncated_normal(shape, stddev=0.1, dtype=tf.float64)
+        return tf.Variable(initial)
 
     def bias_variable(self, shape):
         initial = tf.constant(1.0, shape = shape)
@@ -115,7 +115,7 @@ class ConvNet():
     def apply_convolution(self, x, k_size, num_ch, depth):
         weights = self.weight_variable([k_size, k_size, num_ch, depth])
         biases = self.bias_variable([depth])
-        return nn.relu(tf.add(conv2d(x, weights), biases))
+        return nn.relu(tf.add(self.conv2d(x, weights), biases))
 
     def apply_max_pool(self, x, k_size, stride_size):
         return nn.max_pool(x, k_size=[1, k_size, k_size, 1], strides=[1, stride_size, stride_size, 1], padding='SAME')

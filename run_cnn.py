@@ -1,4 +1,5 @@
 import tensorflow as tf
+import os
 from os.path import isfile
 import pickle
 import numpy as np
@@ -23,9 +24,9 @@ def main():
     tf.reset_default_graph()
 
     parent_dir = PARENT_DIR
-    sub_dir = ['fold1', 'fold2', 'fold3']
+    sub_dir = ['fold1', 'fold2', 'fold3', 'fold4', 'fold5', 'fold6', 'fold7', 'fold8', 'fold9', 'fold10']
 
-    print(parent_dir + sub_dir[0])
+    print('PATH:', os.path.join(parent_dir, sub_dir[0]))
 
     if not isfile('audio_CNNdataset.pickle'):
         f = FeatureParser()
@@ -40,13 +41,13 @@ def main():
         test_x = features[~tr_ts_split]
         test_y = features[~tr_ts_split]
 
-        data_dict = {'tr_features': train_x,
+        data = {'tr_features': train_x,
                      'tr_labels': train_y,
                      'ts_features': test_x,
                      'ts_labels': test_y}
 
         with open('audio_CNNdataset.pickle', 'wb') as handle:
-            pickle.dump(data_dict, handle, protocol=pickle.HIGHEST_PROTOCOL)
+            pickle.dump(data, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
     else:
         with open('audio_CNNdataset.pickle', 'rb') as handle:
@@ -56,7 +57,7 @@ def main():
 #        print('Shape of train_x:{}'.format(sess.run(tf.shape(data['tr_features']))))
 
     print('TRAIN_X:{}\nTEST_X:{}'.format(data['tr_features'], data['ts_features']))
-    print('FEATURE_SHAPE:{}'.format(features.shape[1]))
+    #print('FEATURE_SHAPE:{}'.format(features.shape[1]))
 
     # Initialize the ConvNet model
     model = ConvNet(data['tr_features'].shape[1], NUM_CLASSES, LEARNING_RATE, FRAMES, BANDS, NUM_CH, BATCH_SIZE, KERNEL_SIZE, HIDDEN1, DEPTH) 

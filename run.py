@@ -11,7 +11,7 @@ PARENT_DIR='/media/jeonghwan/Seagate Expansion Drive/UrbanSound8K/audio'
 
 def main():
     parent_dir = PARENT_DIR
-    sub_dir = ['fold1', 'fold2', 'fold3']
+    sub_dir = ['fold1', 'fold2', 'fold3', 'fold4', 'fold5', 'fold6', 'fold7', 'fold8', 'fold9', 'fold10']
 
     if not isfile('audio_dataset.pickle'):
         f = FeatureParser()
@@ -26,13 +26,13 @@ def main():
         test_x = features[~tr_ts_split]
         test_y = features[~tr_ts_split]
 
-        data_dict = {'tr_features': train_x,
+        data = {'tr_features': train_x,
                      'tr_labels': train_y,
                      'ts_features': test_x,
                      'ts_labels': test_y}
 
         with open('audio_dataset.pickle', 'wb') as handle:
-            pickle.dump(data_dict, handle, protocol=pickle.HIGHEST_PROTOCOL)
+            pickle.dump(data, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
     else:
         with open('audio_dataset.pickle', 'rb') as handle:
@@ -44,7 +44,8 @@ def main():
         print('Shape of test_x:{}'.format(sess.run(tf.shape(data['ts_features']))))
 
     print('TRAIN_X:{}\nTEST_X:{}'.format(data['tr_features'], data['ts_features']))
-    print('FEATURE SHAPE:{}'.format(features.shape[1]))
+    #print('FEATURE SHAPE:{}'.format(data['tr_features'].shape[1]))
+
     # Initialize the feed-forward model
     model = FeedForward(data['tr_features'].shape[1], NUM_CLASS, LEARNING_RATE)
     model.train_layers(data['tr_features'], data['tr_labels'], data['ts_features'], data['ts_labels'])

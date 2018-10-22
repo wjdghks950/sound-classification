@@ -76,6 +76,8 @@ class FeatureParser():
                     sound_clip, sr = librosa.load(fn)
                     lbl = fn.split('/')[7].split('-')[1]
                     for (start, end) in self.windows(sound_clip, window_size):
+                        start = int(start)
+                        end = int(end)
                         if(len(sound_clip[start:end]) == window_size):
                             signal = sound_clip[start:end]
                             melspec = librosa.feature.melspectrogram(signal, n_mels = bands)
